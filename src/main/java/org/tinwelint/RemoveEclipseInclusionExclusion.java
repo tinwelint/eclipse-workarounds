@@ -13,19 +13,14 @@ public class RemoveEclipseInclusionExclusion
     public static void main( String[] args ) throws IOException
     {
         for ( String arg : args )
-        {
-            File root = new File( arg );
-            removeInclusionExclusion( root, 0 );
-        }
+            removeInclusionExclusion( new File( arg ), 0 );
     }
 
     private static void removeInclusionExclusion( File file, int depth ) throws IOException
     {
         if ( file.isDirectory() && depth < 2 )
-        {
             for ( File sub : file.listFiles() )
                 removeInclusionExclusion( sub, depth+1 );
-        }
         else if ( file.getName().equals( ".classpath" ) )
             removeFromDotClasspathFile( file );
     }
@@ -35,28 +30,31 @@ public class RemoveEclipseInclusionExclusion
         List<String> lines = new ArrayList<String>();
         boolean changed = false;
         for ( String line : loadTextFile( file ) )
-        {
             if ( purgeLine( line, lines ) )
                 changed = true;
-        }
         
         if ( changed )
         {
-            System.out.println( "Fixed " + file );
-            PrintStream out = new PrintStream( file );
-            try
-            {
-                for ( String line : lines )
-                    out.println( line );
-            }
-            finally
-            {
-                out.close();
-            }
+            System.out.println( "Fixed " + file.getParentFile() );
+            saveTextFile( file, lines );
         }
     }
 
-    private static Iterable<String> loadTextFile( File file ) throws IOException
+    static void saveTextFile( File file, List<String> lines ) throws IOException
+    {
+        PrintStream out = new PrintStream( file );
+        try
+        {
+            for ( String line : lines )
+                out.println( line );
+        }
+        finally
+        {
+            out.close();
+        }
+    }
+
+    static List<String> loadTextFile( File file ) throws IOException
     {
         BufferedReader reader = null;
         List<String> lines = new ArrayList<String>(); 
@@ -74,19 +72,12 @@ public class RemoveEclipseInclusionExclusion
                 reader.close();
         }
     }
-
+    
     private static boolean purgeLine( String line, List<String> lines )
     {
         String result = purgeFrom( line, " excluding=\"" );
         result = purgeFrom( result, " including=\"" );
         lines.add( result );
-//        if ( line.equals( result ) )
-//            System.out.println( line );
-//        else
-//        {
-//            System.out.println( "-" + line );
-//            System.out.println( "+" + result );
-//        }
         return !line.equals( result );
     }
 
