@@ -1,28 +1,22 @@
 package org.tinwelint;
 
-import static org.tinwelint.RemoveEclipseInclusionExclusion.loadTextFile;
-import static org.tinwelint.RemoveEclipseInclusionExclusion.saveTextFile;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.tinwelint.FileUtils.fileFilter;
+import static org.tinwelint.FileUtils.listFilesRecursively;
+import static org.tinwelint.RemoveEclipseInclusionExclusion.loadTextFile;
+import static org.tinwelint.RemoveEclipseInclusionExclusion.saveTextFile;
 
 public class RemoveMavenBuilders
 {
     public static void main( String[] args ) throws IOException
     {
         for ( String arg : args )
-            removeMavenBuilders( new File( arg ), 0 );
-    }
-
-    private static void removeMavenBuilders( File file, int depth ) throws IOException
-    {
-        if ( file.isDirectory() && depth < 2 )
-            for ( File sub : file.listFiles() )
-                removeMavenBuilders( sub, depth+1 );
-        else if ( file.getName().equals( ".project" ) )
-            removeFromDotProjectFile( file );
+            for ( File projectFile : listFilesRecursively( new File( arg ), 3, fileFilter( ".project" ) ) )
+                removeFromDotProjectFile( projectFile );
     }
 
     private static void removeFromDotProjectFile( File file ) throws IOException

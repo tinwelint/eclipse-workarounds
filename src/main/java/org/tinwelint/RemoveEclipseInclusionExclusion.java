@@ -13,16 +13,8 @@ public class RemoveEclipseInclusionExclusion
     public static void main( String[] args ) throws IOException
     {
         for ( String arg : args )
-            removeInclusionExclusion( new File( arg ), 0 );
-    }
-
-    private static void removeInclusionExclusion( File file, int depth ) throws IOException
-    {
-        if ( file.isDirectory() && depth < 2 )
-            for ( File sub : file.listFiles() )
-                removeInclusionExclusion( sub, depth+1 );
-        else if ( file.getName().equals( ".classpath" ) )
-            removeFromDotClasspathFile( file );
+            for ( File classpathFile : FileUtils.listFilesRecursively( new File( arg ), 3, FileUtils.fileFilter( ".classpath" ) ) )
+                removeFromDotClasspathFile( classpathFile );
     }
 
     private static void removeFromDotClasspathFile( File file ) throws IOException
