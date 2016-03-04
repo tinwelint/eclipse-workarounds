@@ -8,7 +8,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RemoveEclipseInclusionExclusion
+public class RemoveGeneratedSourceFromBuild
 {
     public static void main( String[] args ) throws IOException
     {
@@ -19,11 +19,29 @@ public class RemoveEclipseInclusionExclusion
 
     private static void removeFromDotClasspathFile( File file ) throws IOException
     {
+        System.out.println( "trying " + file );
         List<String> lines = new ArrayList<String>();
         boolean changed = false;
+        boolean purgeMode = false;
         for ( String line : loadTextFile( file ) )
-            if ( purgeLine( line, lines ) )
+        {
+            if ( line.trim().startsWith( "<classpathentry" ) &&
+                    line.contains( "path=\"target/generated-sources/version\"" ) )
+            {
+                purgeMode = true;
                 changed = true;
+            }
+
+            if ( !purgeMode )
+            {
+                lines.add( line );
+            }
+
+            if ( purgeMode && line.trim().startsWith( "</classpathentry>" ) )
+            {
+                purgeMode = false;
+            }
+        }
 
         if ( changed )
         {
@@ -63,25 +81,5 @@ public class RemoveEclipseInclusionExclusion
             if ( reader != null )
                 reader.close();
         }
-    }
-
-    private static boolean purgeLine( String line, List<String> lines )
-    {
-        String result = purgeFrom( line, " excluding=\"" );
-        result = purgeFrom( result, " including=\"" );
-        lines.add( result );
-        return !line.equals( result );
-    }
-
-    private static String purgeFrom( String line, String find )
-    {
-        int beginIndex = line.indexOf( find );
-        if ( beginIndex != -1 )
-        {
-            int firstQuote = line.indexOf( '"', beginIndex );
-            int end = line.indexOf( '"', firstQuote+1 );
-            line = line.substring( 0, beginIndex ) + line.substring( end+1 );
-        }
-        return line;
     }
 }

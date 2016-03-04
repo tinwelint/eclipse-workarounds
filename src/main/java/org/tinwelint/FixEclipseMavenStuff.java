@@ -8,5 +8,6 @@ public class FixEclipseMavenStuff
     {
         RemoveEclipseInclusionExclusion.main( args );
         RemoveMavenBuilders.main( args );
+        RemoveGeneratedSourceFromBuild.main( args );
     }
 }
