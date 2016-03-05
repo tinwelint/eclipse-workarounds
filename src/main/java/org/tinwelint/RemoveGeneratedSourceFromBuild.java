@@ -19,7 +19,6 @@ public class RemoveGeneratedSourceFromBuild
 
     private static void removeFromDotClasspathFile( File file ) throws IOException
     {
-        System.out.println( "trying " + file );
         List<String> lines = new ArrayList<String>();
         boolean changed = false;
         boolean purgeMode = false;
