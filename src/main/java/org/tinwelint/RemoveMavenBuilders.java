@@ -7,8 +7,8 @@ import java.util.List;
 
 import static org.tinwelint.FileUtils.fileFilter;
 import static org.tinwelint.FileUtils.listFilesRecursively;
-import static org.tinwelint.RemoveEclipseInclusionExclusion.loadTextFile;
-import static org.tinwelint.RemoveEclipseInclusionExclusion.saveTextFile;
+import static org.tinwelint.FileUtils.loadTextFile;
+import static org.tinwelint.FileUtils.saveTextFile;
 
 public class RemoveMavenBuilders
 {
@@ -24,7 +24,6 @@ public class RemoveMavenBuilders
         String[] lines = loadTextFile( file ).toArray( new String[0] );
         List<String> pruned = new ArrayList<String>();
         boolean changed = false;
-
         int start = -1;
         boolean prune = false;
         for ( int i = 0; i < lines.length; i++ )
@@ -44,7 +43,6 @@ public class RemoveMavenBuilders
                         pruned.add( lines[l] );
                 start = -1;
             }
-
             if ( start == -1 )
             {
                 if ( prune )
@@ -53,15 +51,14 @@ public class RemoveMavenBuilders
                     pruned.add( line );
             }
         }
-
         if ( changed )
         {
             System.out.println( "Fixed " + file.getAbsolutePath() );
             saveTextFile( file, pruned );
         }
-
         File externalBuildersDir = new File( file.getParentFile(), ".externalToolBuilders" );
         if ( externalBuildersDir.exists() )
+        {
             for ( File builder : externalBuildersDir.listFiles() )
             {
                 if ( builder.getName().startsWith( "org.eclipse.m2e.core.maven2Builder" ) )
@@ -70,5 +67,6 @@ public class RemoveMavenBuilders
                     System.out.println( "Deleted " + builder );
                 }
             }
+        }
     }
 }
